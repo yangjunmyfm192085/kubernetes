@@ -637,6 +637,11 @@ func (ds *dockerService) makeSandboxDockerConfig(c *runtimeapi.PodSandboxConfig,
 			// TODO: Handle environment variables.
 			Image:  image,
 			Labels: labels,
+			//Disable Docker's health check for pause container.
+			//Otherwise, after setting HEALTHCHECK in the dockerfile, the pause container status shows unhealthy
+			Healthcheck: &dockercontainer.HealthConfig{
+				Test: []string{"NONE"},
+			},
 		},
 		HostConfig: hc,
 	}
