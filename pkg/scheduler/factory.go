@@ -389,7 +389,7 @@ func MakeDefaultErrorFunc(client clientset.Interface, podLister corelisters.PodL
 				if err != nil && apierrors.IsNotFound(err) {
 					node := v1.Node{ObjectMeta: metav1.ObjectMeta{Name: nodeName}}
 					if err := schedulerCache.RemoveNode(&node); err != nil {
-						klog.V(4).InfoS("Node is not found; failed to remove it from the cache", "node", node.Name)
+						klog.V(4).InfoS("Node is not found; failed to remove it from the cache", "nodeName", node.Name)
 					}
 				}
 			}
@@ -407,7 +407,7 @@ func MakeDefaultErrorFunc(client clientset.Interface, podLister corelisters.PodL
 		// In the case of extender, the pod may have been bound successfully, but timed out returning its response to the scheduler.
 		// It could result in the live version to carry .spec.nodeName, and that's inconsistent with the internal-queued version.
 		if len(cachedPod.Spec.NodeName) != 0 {
-			klog.InfoS("Pod has been assigned to node. Abort adding it back to queue.", "pod", klog.KObj(pod), "node", cachedPod.Spec.NodeName)
+			klog.InfoS("Pod has been assigned to node. Abort adding it back to queue.", "pod", klog.KObj(pod), "nodeName", cachedPod.Spec.NodeName)
 			return
 		}
 

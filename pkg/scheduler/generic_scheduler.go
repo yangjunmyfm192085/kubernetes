@@ -243,7 +243,7 @@ func (g *genericScheduler) findNodesThatFitPod(ctx context.Context, extenders []
 	if len(pod.Status.NominatedNodeName) > 0 && feature.DefaultFeatureGate.Enabled(features.PreferNominatedNode) {
 		feasibleNodes, err := g.evaluateNominatedNode(ctx, extenders, pod, fwk, state, diagnosis)
 		if err != nil {
-			klog.ErrorS(err, "Evaluation failed on nominated node", "pod", klog.KObj(pod), "node", pod.Status.NominatedNodeName)
+			klog.ErrorS(err, "Evaluation failed on nominated node", "pod", klog.KObj(pod), "nodeName", pod.Status.NominatedNodeName)
 		}
 		// Nominated node passes all the filters, scheduler is good to assign this node to the pod.
 		if len(feasibleNodes) != 0 {
@@ -431,7 +431,7 @@ func prioritizeNodes(
 	if klog.V(10).Enabled() {
 		for plugin, nodeScoreList := range scoresMap {
 			for _, nodeScore := range nodeScoreList {
-				klog.InfoS("Plugin scored node for pod", "pod", klog.KObj(pod), "plugin", plugin, "node", nodeScore.Name, "score", nodeScore.Score)
+				klog.InfoS("Plugin scored node for pod", "pod", klog.KObj(pod), "plugin", plugin, "nodeName", nodeScore.Name, "score", nodeScore.Score)
 			}
 		}
 	}
@@ -488,7 +488,7 @@ func prioritizeNodes(
 
 	if klog.V(10).Enabled() {
 		for i := range result {
-			klog.InfoS("Calculated node's final score for pod", "pod", klog.KObj(pod), "node", result[i].Name, "score", result[i].Score)
+			klog.InfoS("Calculated node's final score for pod", "pod", klog.KObj(pod), "nodeName", result[i].Name, "score", result[i].Score)
 		}
 	}
 	return result, nil

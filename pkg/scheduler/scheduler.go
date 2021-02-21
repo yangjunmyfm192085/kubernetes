@@ -435,7 +435,7 @@ func (sched *Scheduler) assume(assumed *v1.Pod, host string) error {
 	assumed.Spec.NodeName = host
 
 	if err := sched.SchedulerCache.AssumePod(assumed); err != nil {
-		klog.ErrorS(err, "scheduler cache AssumePod failed")
+		klog.ErrorS(err, "Scheduler cache AssumePod failed")
 		return err
 	}
 	// if "assumed" is a nominated pod, we should remove it from internal cache
@@ -484,7 +484,7 @@ func (sched *Scheduler) extendersBinding(pod *v1.Pod, node string) (bool, error)
 
 func (sched *Scheduler) finishBinding(fwk framework.Framework, assumed *v1.Pod, targetNode string, err error) {
 	if finErr := sched.SchedulerCache.FinishBinding(assumed); finErr != nil {
-		klog.ErrorS(finErr, "scheduler cache FinishBinding failed")
+		klog.ErrorS(finErr, "Scheduler cache FinishBinding failed")
 	}
 	if err != nil {
 		klog.V(1).InfoS("Failed to bind pod", "pod", klog.KObj(assumed))
@@ -585,7 +585,7 @@ func (sched *Scheduler) scheduleOne(ctx context.Context) {
 		// trigger un-reserve to clean up state associated with the reserved Pod
 		fwk.RunReservePluginsUnreserve(schedulingCycleCtx, state, assumedPod, scheduleResult.SuggestedHost)
 		if forgetErr := sched.SchedulerCache.ForgetPod(assumedPod); forgetErr != nil {
-			klog.ErrorS(forgetErr, "scheduler cache ForgetPod failed")
+			klog.ErrorS(forgetErr, "Scheduler cache ForgetPod failed")
 		}
 		sched.recordSchedulingFailure(fwk, assumedPodInfo, sts.AsError(), SchedulerError, "")
 		return
@@ -605,7 +605,7 @@ func (sched *Scheduler) scheduleOne(ctx context.Context) {
 		// One of the plugins returned status different than success or wait.
 		fwk.RunReservePluginsUnreserve(schedulingCycleCtx, state, assumedPod, scheduleResult.SuggestedHost)
 		if forgetErr := sched.SchedulerCache.ForgetPod(assumedPod); forgetErr != nil {
-			klog.ErrorS(forgetErr, "scheduler cache ForgetPod failed")
+			klog.ErrorS(forgetErr, "Scheduler cache ForgetPod failed")
 		}
 		sched.recordSchedulingFailure(fwk, assumedPodInfo, runPermitStatus.AsError(), reason, "")
 		return
@@ -638,7 +638,7 @@ func (sched *Scheduler) scheduleOne(ctx context.Context) {
 			// trigger un-reserve plugins to clean up state associated with the reserved Pod
 			fwk.RunReservePluginsUnreserve(bindingCycleCtx, state, assumedPod, scheduleResult.SuggestedHost)
 			if forgetErr := sched.SchedulerCache.ForgetPod(assumedPod); forgetErr != nil {
-				klog.ErrorS(forgetErr, "scheduler cache ForgetPod failed")
+				klog.ErrorS(forgetErr, "Scheduler cache ForgetPod failed")
 			}
 			sched.recordSchedulingFailure(fwk, assumedPodInfo, waitOnPermitStatus.AsError(), reason, "")
 			return
@@ -651,7 +651,7 @@ func (sched *Scheduler) scheduleOne(ctx context.Context) {
 			// trigger un-reserve plugins to clean up state associated with the reserved Pod
 			fwk.RunReservePluginsUnreserve(bindingCycleCtx, state, assumedPod, scheduleResult.SuggestedHost)
 			if forgetErr := sched.SchedulerCache.ForgetPod(assumedPod); forgetErr != nil {
-				klog.ErrorS(forgetErr, "scheduler cache ForgetPod failed")
+				klog.ErrorS(forgetErr, "Scheduler cache ForgetPod failed")
 			}
 			sched.recordSchedulingFailure(fwk, assumedPodInfo, preBindStatus.AsError(), SchedulerError, "")
 			return
@@ -663,7 +663,7 @@ func (sched *Scheduler) scheduleOne(ctx context.Context) {
 			// trigger un-reserve plugins to clean up state associated with the reserved Pod
 			fwk.RunReservePluginsUnreserve(bindingCycleCtx, state, assumedPod, scheduleResult.SuggestedHost)
 			if err := sched.SchedulerCache.ForgetPod(assumedPod); err != nil {
-				klog.ErrorS(err, "scheduler cache ForgetPod failed")
+				klog.ErrorS(err, "Scheduler cache ForgetPod failed")
 			}
 			sched.recordSchedulingFailure(fwk, assumedPodInfo, fmt.Errorf("binding rejected: %w", err), SchedulerError, "")
 		} else {
