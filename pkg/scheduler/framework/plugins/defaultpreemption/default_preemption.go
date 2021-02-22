@@ -124,7 +124,7 @@ func (pl *DefaultPreemption) preempt(ctx context.Context, state *framework.Cycle
 	podNamespace, podName := pod.Namespace, pod.Name
 	pod, err := pl.podLister.Pods(pod.Namespace).Get(pod.Name)
 	if err != nil {
-		klog.ErrorS(err, "getting the updated preemptor pod object", "pod", klog.KRef(podNamespace, podName))
+		klog.ErrorS(err, "Getting the updated preemptor pod object", "pod", klog.KRef(podNamespace, podName))
 		return "", framework.AsStatus(err)
 	}
 
@@ -209,7 +209,7 @@ func (pl *DefaultPreemption) FindCandidates(ctx context.Context, state *framewor
 		klog.V(3).InfoS("Preemption will not help schedule pod on any node", "pod", klog.KObj(pod))
 		// In this case, we should clean-up any existing nominated node name of the pod.
 		if err := util.ClearNominatedNodeName(pl.fh.ClientSet(), pod); err != nil {
-			klog.ErrorS(err, "cannot clear 'NominatedNodeName' field of pod", "pod", klog.KObj(pod))
+			klog.ErrorS(err, "Cannot clear 'NominatedNodeName' field of pod", "pod", klog.KObj(pod))
 			// We do not return as this error is not critical.
 		}
 		return nil, unschedulableNodeStatus, nil
@@ -444,7 +444,7 @@ func SelectCandidate(candidates []Candidate) Candidate {
 	}
 
 	// We shouldn't reach here.
-	klog.ErrorS(errors.New("no candidate selected"), "should not reach here", "candidates", candidates)
+	klog.ErrorS(errors.New("no candidate selected"), "Should not reach here", "candidates", candidates)
 	// To not break the whole flow, return the first candidate.
 	return candidates[0]
 }
@@ -559,7 +559,7 @@ func pickOneNodeForPreemption(nodesToVictims map[string]*extenderv1.Victims) str
 	if latestStartTime == nil {
 		// If the earliest start time of all pods on the 1st node is nil, just return it,
 		// which is not expected to happen.
-		klog.ErrorS(errors.New("earliestStartTime is nil for node"), "should not reach here", "node", minNodes2[0])
+		klog.ErrorS(errors.New("earliestStartTime is nil for node"), "Should not reach here", "node", minNodes2[0])
 		return minNodes2[0]
 	}
 	nodeToReturn := minNodes2[0]
@@ -568,7 +568,7 @@ func pickOneNodeForPreemption(nodesToVictims map[string]*extenderv1.Victims) str
 		// Get earliest start time of all pods on the current node.
 		earliestStartTimeOnNode := util.GetEarliestPodStartTime(nodesToVictims[node])
 		if earliestStartTimeOnNode == nil {
-			klog.ErrorS(errors.New("earliestStartTime is nil for node"), "should not reach here", "node", node)
+			klog.ErrorS(errors.New("earliestStartTime is nil for node"), "Should not reach here", "node", node)
 			continue
 		}
 		if earliestStartTimeOnNode.After(latestStartTime.Time) {
@@ -713,7 +713,7 @@ func PrepareCandidate(c Candidate, fh framework.Handle, cs kubernetes.Interface,
 	// lets scheduler find another place for them.
 	nominatedPods := getLowerPriorityNominatedPods(fh, pod, c.Name())
 	if err := util.ClearNominatedNodeName(cs, nominatedPods...); err != nil {
-		klog.ErrorS(err, "cannot clear 'NominatedNodeName' field")
+		klog.ErrorS(err, "Cannot clear 'NominatedNodeName' field")
 		// We do not return as this error is not critical.
 	}
 
