@@ -163,8 +163,8 @@ func setup(t *testing.T) (context.Context, testClientSet, context.CancelFunc) {
 
 	cfg := rest.CopyConfig(server.ClientConfig)
 	// Discovery integration tests can poll very frequently and should not flake due to client-side throttling.
-	cfg.QPS = 50
-	cfg.Burst = 100
+	cfg.QPS = 1000
+	cfg.Burst = 10000
 	cfg.RateLimiter = nil
 
 	kubeClientSet, err := kubernetes.NewForConfig(cfg)
