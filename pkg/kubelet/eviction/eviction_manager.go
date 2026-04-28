@@ -588,8 +588,8 @@ func (m *managerImpl) containerEphemeralStorageLimitEviction(logger klog.Logger,
 			thresholdsMap[container.Name] = ephemeralLimit
 		}
 	}
-	for i, container := range pod.Spec.InitContainers {
-		if !podutil.IsRestartableInitContainer(&pod.Spec.InitContainers[i]) {
+	for _, container := range pod.Spec.InitContainers {
+		if !podutil.IsRestartableInitContainer(&container) {
 			continue
 		}
 		ephemeralLimit := container.Resources.Limits.StorageEphemeral()

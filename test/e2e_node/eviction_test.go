@@ -1316,7 +1316,7 @@ func diskConsumingSidecarPod(name string, diskConsumedMB int, sidecarResources v
 				{
 					Image:   busyboxImage,
 					Name:    fmt.Sprintf("%s-container", name),
-					Command: []string{"sh", "-c", "while true; do sleep 5; done"},
+					Command: []string{"sh", "-c", "sleep infinity"},
 				},
 			},
 		},
