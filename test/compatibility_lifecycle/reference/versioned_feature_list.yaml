@@ -263,7 +263,7 @@
     lockToDefault: true
     preRelease: GA
     version: "1.34"
-- name: ConsistentListFromCacheSkipStorageFallback
+- name: ConsistentListFromCacheSkipTimeoutFallback
   versionedSpecs:
   - default: false
     lockToDefault: false

@@ -2195,7 +2195,7 @@ var defaultVersionedKubernetesFeatureGates = map[featuregate.Feature]featuregate
 		{Version: version.MustParse("1.34"), Default: true, PreRelease: featuregate.GA, LockToDefault: true},
 	},
 
-	genericfeatures.ConsistentListFromCacheSkipStorageFallback: {
+	genericfeatures.ConsistentListFromCacheSkipTimeoutFallback: {
 		{Version: version.MustParse("1.37"), Default: false, PreRelease: featuregate.Alpha},
 	},
 
@@ -2741,7 +2741,7 @@ var defaultKubernetesFeatureGateDependencies = map[featuregate.Feature][]feature
 
 	genericfeatures.ConsistentListFromCache: {},
 
-	genericfeatures.ConsistentListFromCacheSkipStorageFallback: {},
+	genericfeatures.ConsistentListFromCacheSkipTimeoutFallback: {genericfeatures.ConsistentListFromCache},
 
 	genericfeatures.ConstrainedImpersonation: {},
 
