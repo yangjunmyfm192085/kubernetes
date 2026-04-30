@@ -2195,6 +2195,10 @@ var defaultVersionedKubernetesFeatureGates = map[featuregate.Feature]featuregate
 		{Version: version.MustParse("1.34"), Default: true, PreRelease: featuregate.GA, LockToDefault: true},
 	},
 
+	genericfeatures.ConsistentListFromCacheSkipStorageFallback: {
+		{Version: version.MustParse("1.37"), Default: false, PreRelease: featuregate.Alpha},
+	},
+
 	genericfeatures.ConstrainedImpersonation: {
 		{Version: version.MustParse("1.35"), Default: false, PreRelease: featuregate.Alpha},
 		{Version: version.MustParse("1.36"), Default: true, PreRelease: featuregate.Beta},
@@ -2736,6 +2740,8 @@ var defaultKubernetesFeatureGateDependencies = map[featuregate.Feature][]feature
 	genericfeatures.ConcurrentWatchObjectDecode: {},
 
 	genericfeatures.ConsistentListFromCache: {},
+
+	genericfeatures.ConsistentListFromCacheSkipStorageFallback: {},
 
 	genericfeatures.ConstrainedImpersonation: {},
 
