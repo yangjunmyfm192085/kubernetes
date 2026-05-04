@@ -461,6 +461,9 @@ func TestFeatureEnabled(t *testing.T) {
 
 func TestRestart(t *testing.T) {
 	logger, tCtx := ktesting.NewTestContext(t)
+	ctx, cancel := context.WithCancel(tCtx)
+	defer cancel()
+
 	systemDbusTmp := systemDbus
 	defer func() {
 		systemDbus = systemDbusTmp
@@ -511,7 +514,7 @@ func TestRestart(t *testing.T) {
 		StateDirectory:                  os.TempDir(),
 	})
 
-	err := manager.Start(tCtx)
+	err := manager.Start(ctx)
 	lock.Unlock()
 
 	if err != nil {
@@ -528,6 +531,68 @@ func TestRestart(t *testing.T) {
 		shutdownChanMut.Lock()
 		close(shutdownChan)
 		shutdownChanMut.Unlock()
+	}
+}
+
+func TestStartDoesNotReconnectAfterContextCancel(t *testing.T) {
+	logger, tCtx := ktesting.NewTestContext(t)
+	ctx, cancel := context.WithCancel(tCtx)
+	defer cancel()
+
+	systemDbusTmp := systemDbus
+	defer func() {
+		systemDbus = systemDbusTmp
+	}()
+
+	shutdownGracePeriodRequested := 30 * time.Second
+	shutdownGracePeriodCriticalPods := 10 * time.Second
+	systemInhibitDelay := 40 * time.Second
+	overrideSystemInhibitDelay := 40 * time.Second
+
+	shutdownChans := make(chan chan bool, 2)
+
+	lock.Lock()
+	systemDbus = func() (dbusInhibiter, error) {
+		ch := make(chan bool)
+		shutdownChans <- ch
+		return &fakeDbus{
+			currentInhibitDelay:        systemInhibitDelay,
+			shutdownChan:               ch,
+			overrideSystemInhibitDelay: overrideSystemInhibitDelay,
+		}, nil
+	}
+
+	manager := NewManager(&Config{
+		Logger:                          logger,
+		VolumeManager:                   volumemanager.NewFakeVolumeManager([]v1.UniqueVolumeName{}, 0, nil, false),
+		Recorder:                        &record.FakeRecorder{},
+		NodeRef:                         &v1.ObjectReference{Kind: "Node", Name: "test", UID: types.UID("test"), Namespace: ""},
+		GetPodsFunc:                     func() []*v1.Pod { return nil },
+		KillPodFunc:                     func(*v1.Pod, bool, *int64, func(*v1.PodStatus)) error { return nil },
+		SyncNodeStatusFunc:              func(context.Context) {},
+		ShutdownGracePeriodRequested:    shutdownGracePeriodRequested,
+		ShutdownGracePeriodCriticalPods: shutdownGracePeriodCriticalPods,
+		StateDirectory:                  os.TempDir(),
+	})
+
+	err := manager.Start(ctx)
+	lock.Unlock()
+	require.NoError(t, err)
+
+	var shutdownChan chan bool
+	select {
+	case shutdownChan = <-shutdownChans:
+	case <-time.After(dbusReconnectPeriod):
+		t.Fatal("timed out waiting for initial dbus watch")
+	}
+
+	cancel()
+	close(shutdownChan)
+
+	select {
+	case <-shutdownChans:
+		t.Fatal("shutdown manager reconnected after context cancellation")
+	case <-time.After(dbusReconnectPeriod * 5):
 	}
 }
 
