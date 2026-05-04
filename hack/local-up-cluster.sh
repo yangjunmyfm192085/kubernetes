@@ -1468,7 +1468,6 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
 fi
 
 kube::util::test_openssl_installed
-kube::util::ensure-cfssl
 
 ### IF the user didn't supply an output/ for the build... Then we detect.
 if [ "${GO_OUT}" == "" ]; then
@@ -1476,6 +1475,15 @@ if [ "${GO_OUT}" == "" ]; then
 fi
 echo "Detected host and ready to start services.  Doing some housekeeping first..."
 echo "Using GO_OUT ${GO_OUT}"
+
+# kube::util::ensure-cfssl downloads cfssl when cfssl is not found in PATH.
+# Point it at the persistent cache dir and apppend it to PATH so cfssl is
+# downloaded only on the first run and reused afterwards.
+KUBERNETES_SERVER_CACHE_DIR=${KUBERNETES_SERVER_CACHE_DIR:-"${GO_OUT}"}
+CFSSL_PATH="${KUBERNETES_SERVER_CACHE_DIR}/cfssl"
+PATH="${PATH}:${CFSSL_PATH}"
+kube::util::ensure-cfssl "${CFSSL_PATH}"
+
 export KUBELET_CIDFILE=${TMP_DIR}/kubelet.cid
 if [[ "${ENABLE_DAEMON}" = false ]]; then
   trap cleanup EXIT
