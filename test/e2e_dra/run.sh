@@ -18,10 +18,8 @@ set -ex
 
 killall etcd || true
 sudo rm -rf /tmp/ginkgo* /tmp/*.log /var/run/kubernetes /var/run/cdi /var/lib/kubelet/plugins_registry /var/lib/kubelet/plugins /var/lib/kubelet/*_state /var/lib/kubelet/checkpoints /tmp/artifacts
-sudo mkdir /var/lib/kubelet/plugins_registry
-sudo mkdir /var/lib/kubelet/plugins
-sudo mkdir /var/run/cdi
-sudo chown "$(id -u)" /var/lib/kubelet/plugins_registry /var/lib/kubelet/plugins /var/run/cdi
+sudo mkdir /var/run/kubernetes /var/lib/kubelet/plugins_registry /var/lib/kubelet/plugins /var/run/cdi
+sudo chown "$(id -u)" /var/run/kubernetes /var/lib/kubelet/plugins_registry /var/lib/kubelet/plugins /var/run/cdi
 ARTIFACTS=/tmp/artifacts
 TMP_DIR=${ARTIFACTS}/tmp
 LOG_DIR=${ARTIFACTS}/logs
