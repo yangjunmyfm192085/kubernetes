@@ -32,6 +32,11 @@ if (( KUBE_VERBOSE >= 2 )); then
   set -x
 fi
 
+# Same defaults as in etcd.sh, repeated here to make them visible
+# to users of this script when using KUBE_VERBOSE >= 2.
+ETCD_HOST=${ETCD_HOST:-127.0.0.1}
+ETCD_PORT=${ETCD_PORT:-2379}
+
 ALLOW_PRIVILEGED=${ALLOW_PRIVILEGED:-""}
 RUNTIME_CONFIG=${RUNTIME_CONFIG:-""}
 KUBELET_AUTHORIZATION_WEBHOOK=${KUBELET_AUTHORIZATION_WEBHOOK:-""}
@@ -549,7 +554,7 @@ function warning_log {
 function start_etcd {
     echo "Starting etcd"
     export ETCD_LOGFILE=${LOG_DIR}/etcd.log
-    kube::etcd::start
+    ETCD_DRY_RUN="${DRY_RUN:-}" kube::etcd::start
 }
 
 function set_service_accounts {
@@ -1055,7 +1060,9 @@ EOF
     KUBELET_PID=$!
 
     # Quick check that kubelet is running.
-    if [ -n "${DRY_RUN}" ] || ( [ -n "${KUBELET_PID}" ] && ps -p ${KUBELET_PID} > /dev/null ); then
+    if [ -n "${DRY_RUN}" ]; then
+      :
+    elif ( [ -n "${KUBELET_PID}" ] && ps -p ${KUBELET_PID} > /dev/null ); then
       echo "kubelet ( ${KUBELET_PID} ) is running."
     else
       cat "${KUBELET_LOG}" ; exit 1
@@ -1485,7 +1492,8 @@ PATH="${PATH}:${CFSSL_PATH}"
 kube::util::ensure-cfssl "${CFSSL_PATH}"
 
 export KUBELET_CIDFILE=${TMP_DIR}/kubelet.cid
-if [[ "${ENABLE_DAEMON}" = false ]]; then
+if [[ "${ENABLE_DAEMON}" = false ]] && [[ -z "${DRY_RUN:-}" ]]; then
+  echo "Enabling cleanup on EXIT and INT..."
   trap cleanup EXIT
   trap cleanup INT
 fi
@@ -1559,8 +1567,7 @@ if [[ -n "${DRY_RUN}" ]]; then
   # Ensure that "run" output has been flushed. This waits for anything which might have been started.
   # shellcheck disable=SC2086
   wait ${APISERVER_PID-} ${CTLRMGR_PID-} ${CLOUD_CTLRMGR_PID-} ${KUBELET_PID-} ${PROXY_PID-} ${SCHEDULER_PID-}
-  echo "Local etcd is running. Run commands. Press Ctrl-C to shut it down."
-  sleep infinity
+  exit 0
 elif [[ "${ENABLE_DAEMON}" = false ]]; then
   while true; do sleep 1; healthcheck; done
 fi
