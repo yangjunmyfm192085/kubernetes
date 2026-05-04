@@ -288,9 +288,12 @@ func (m *managerImpl) start(ctx context.Context) (chan struct{}, error) {
 
 				if isShuttingDown {
 					// Update node status and ready condition
-					go m.syncNodeStatus(ctx)
+					nodeStatusCtx := klog.NewContext(ctx, m.logger)
+					go m.syncNodeStatus(nodeStatusCtx)
 
-					m.processShutdownEvent()
+					if err := m.processShutdownEvent(ctx); err != nil {
+						m.logger.Error(err, "Shutdown manager failed to process shutdown event")
+					}
 				} else {
 					_ = m.acquireInhibitLock()
 				}
@@ -323,7 +326,7 @@ func (m *managerImpl) ShutdownStatus() error {
 	return nil
 }
 
-func (m *managerImpl) processShutdownEvent() error {
+func (m *managerImpl) processShutdownEvent(ctx context.Context) error {
 	m.logger.V(1).Info("Shutdown manager processing shutdown event")
 	activePods := m.getPods()
 
@@ -356,5 +359,5 @@ func (m *managerImpl) processShutdownEvent() error {
 		}()
 	}
 
-	return m.podManager.killPods(activePods)
+	return m.podManager.killPods(ctx, activePods)
 }

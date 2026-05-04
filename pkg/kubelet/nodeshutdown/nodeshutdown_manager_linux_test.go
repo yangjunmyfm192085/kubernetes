@@ -46,6 +46,7 @@ import (
 	"k8s.io/kubernetes/pkg/kubelet/eviction"
 	"k8s.io/kubernetes/pkg/kubelet/nodeshutdown/systemd"
 	"k8s.io/kubernetes/pkg/kubelet/volumemanager"
+	testutilsktesting "k8s.io/kubernetes/test/utils/ktesting"
 	"k8s.io/utils/clock"
 	testingclock "k8s.io/utils/clock/testing"
 )
@@ -597,6 +598,8 @@ func TestStartDoesNotReconnectAfterContextCancel(t *testing.T) {
 }
 
 func Test_managerImpl_processShutdownEvent(t *testing.T) {
+	tCtx := testutilsktesting.Init(t)
+
 	var (
 		fakeRecorder      = &record.FakeRecorder{}
 		fakeVolumeManager = volumemanager.NewFakeVolumeManager([]v1.UniqueVolumeName{}, 0, nil, false)
@@ -661,6 +664,7 @@ func Test_managerImpl_processShutdownEvent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Use a buffered logger because this test asserts log output.
 			logger := ktesting.NewLogger(t,
 				ktesting.NewConfig(
 					ktesting.BufferLogs(true),
@@ -684,8 +688,11 @@ func Test_managerImpl_processShutdownEvent(t *testing.T) {
 					clock:                            tt.fields.clock,
 				},
 			}
-			if err := m.processShutdownEvent(); (err != nil) != tt.wantErr {
-				t.Errorf("managerImpl.processShutdownEvent() error = %v, wantErr %v", err, tt.wantErr)
+			err := m.processShutdownEvent(tCtx)
+			if tt.wantErr {
+				require.Error(t, err, "managerImpl.processShutdownEvent() should return an error")
+			} else {
+				require.NoError(t, err, "managerImpl.processShutdownEvent() should not return an error")
 			}
 
 			underlier, ok := logger.GetSink().(ktesting.Underlier)
@@ -704,6 +711,8 @@ func Test_managerImpl_processShutdownEvent(t *testing.T) {
 }
 
 func Test_processShutdownEvent_VolumeUnmountTimeout(t *testing.T) {
+	tCtx := testutilsktesting.Init(t)
+
 	var (
 		fakeRecorder               = &record.FakeRecorder{}
 		syncNodeStatus             = func(context.Context) {}
@@ -718,6 +727,7 @@ func Test_processShutdownEvent_VolumeUnmountTimeout(t *testing.T) {
 		// for volume unmount operations that take longer than the allowed grace period.
 		fmt.Errorf("unmount timeout"), false,
 	)
+	// Use a buffered logger because this test asserts log output.
 	logger := ktesting.NewLogger(t, ktesting.NewConfig(ktesting.BufferLogs(true)))
 	m := &managerImpl{
 		logger:   logger,
@@ -747,7 +757,7 @@ func Test_processShutdownEvent_VolumeUnmountTimeout(t *testing.T) {
 	}
 
 	start := fakeclock.Now()
-	err := m.processShutdownEvent()
+	err := m.processShutdownEvent(tCtx)
 	end := fakeclock.Now()
 
 	require.NoError(t, err, "managerImpl.processShutdownEvent() should not return an error")
