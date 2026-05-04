@@ -235,6 +235,12 @@
     lockToDefault: true
     preRelease: GA
     version: "1.34"
+- name: ConsistentListFromCacheSkipTimeoutFallback
+  versionedSpecs:
+  - default: false
+    lockToDefault: false
+    preRelease: Alpha
+    version: "1.37"
 - name: ConstrainedImpersonation
   versionedSpecs:
   - default: false
