@@ -1057,10 +1057,6 @@ const (
 	// Enables support for the StorageVersionMigrator controller.
 	StorageVersionMigrator featuregate.Feature = "StorageVersionMigrator"
 
-	// owner: serathius
-	// Allow API server Protobuf encoder to encode collections item by item, instead of all at once.
-	StreamingCollectionEncodingToProtobuf featuregate.Feature = "StreamingCollectionEncodingToProtobuf"
-
 	// owner: @danwinship
 	// kep: https://kep.k8s.io/4858
 	//
@@ -1972,11 +1968,6 @@ var defaultVersionedKubernetesFeatureGates = map[featuregate.Feature]featuregate
 		{Version: version.MustParse("1.35"), Default: false, PreRelease: featuregate.Beta},
 	},
 
-	StreamingCollectionEncodingToProtobuf: {
-		{Version: version.MustParse("1.33"), Default: true, PreRelease: featuregate.Beta},
-		{Version: version.MustParse("1.34"), Default: true, PreRelease: featuregate.GA, LockToDefault: true},
-	},
-
 	StrictIPCIDRValidation: {
 		{Version: version.MustParse("1.33"), Default: false, PreRelease: featuregate.Alpha},
 		{Version: version.MustParse("1.36"), Default: true, PreRelease: featuregate.Beta},
@@ -2612,8 +2603,6 @@ var defaultKubernetesFeatureGateDependencies = map[featuregate.Feature][]feature
 	StorageNamespaceIndex: {},
 
 	StorageVersionMigrator: {},
-
-	StreamingCollectionEncodingToProtobuf: {},
 
 	StrictIPCIDRValidation: {},
 
